@@ -9,3 +9,6 @@
 
 # 카카오톡 
 - 나에게 보내기 활용
+
+# ImageMagick
+ - 설치 https://imagemagick.org/script/download.php

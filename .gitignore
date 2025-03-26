@@ -135,8 +135,10 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-res/
-res
+res/*
+.exe
+*.exe
+/form_data/*
 
 # Spyder project settings
 .spyderproject

@@ -7,6 +7,8 @@ import html
 import os
 from dotenv import load_dotenv
 
+load_dotenv()
+
 # 🔹 OpenAI GPT-4 API 설정
 client = openai.OpenAI(api_key=os.getenv("openAiKey"))
 

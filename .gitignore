@@ -139,6 +139,9 @@ res/*
 .exe
 *.exe
 /form_data/*
+*.mp4
+.mp4
+news_summary.mp4
 
 # Spyder project settings
 .spyderproject
@@ -176,3 +179,5 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+news_summary.mp4
+news_summary.mp4

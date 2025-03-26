@@ -46,7 +46,8 @@ mpy_config.change_settings(
 #     os.makedirs(FORM_DATA_DIR)
 
 # 🔹 OpenAI GPT-4 API 설정
-client = openai.OpenAI(api_key=os.getenv("openAiKey"))
+# client = openai.OpenAI(api_key=os.getenv("openAiKey"))
+openai.api_key = os.getenv("openAiKey")
 
 # 🔹 네이버 검색 API 설정
 client_id = os.getenv("naverId")
@@ -121,14 +122,29 @@ for category, keyword in categories.items():
                     f"다음 뉴스 기사를 짧고 명확하게 요약해줘:\n\n{news['description']}"
                 )
                 try:
-                    response = client.chat.completions.create(
+                    # response = client.chat.completions.create(
+                    #     model="gpt-4",
+                    #     messages=[
+                    #         {
+                    #             "role": "system",
+                    #             "content": "당신은 뉴스 요약 전문가입니다.",
+                    #         },
+                    #         {"role": "user", "content": prompt},
+                    #     ],
+                    #     max_tokens=150,
+                    #     temperature=0.5,
+                    # )
+                    response = openai.ChatCompletion.create(
                         model="gpt-4",
                         messages=[
                             {
                                 "role": "system",
                                 "content": "당신은 뉴스 요약 전문가입니다.",
                             },
-                            {"role": "user", "content": prompt},
+                            {
+                                "role": "user",
+                                "content": prompt,
+                            },
                         ],
                         max_tokens=150,
                         temperature=0.5,
@@ -207,38 +223,39 @@ text_clips = []
 
 
 for category, articles in summarized_news.items():
-    # 텍스트 자막 클립 생성 (뉴스 제목과 요약)
-    original_text = f"{article['title']}\n{article['summary']}"
-    news_text = translate_and_clean(original_text)
-    print("Translated and cleaned news_text:")
-    print(news_text)
+    for article in articles:
+        # 텍스트 자막 클립 생성 (뉴스 제목과 요약)
+        original_text = f"{article['title']}\n{article['summary']}"
+        news_text = translate_and_clean(original_text)
+        print("Translated and cleaned news_text:")
+        print(news_text)
 
-    clip = TextClip(
-        news_text,
-        fontsize=30,
-        color="white",
-        bg_color="black",
-        size=(1280, 720),  # 원하는 해상도 지정
-        method="caption",  # 자동 줄바꿈
-        font="Malgun Gothic",
-    ).set_duration(4)
-    text_clips.append(clip)
+        clip = TextClip(
+            news_text,
+            fontsize=40,
+            color="black",
+            bg_color="white",
+            size=(1280, 720),  # 원하는 해상도 지정
+            method="caption",  # 자동 줄바꿈
+            font="Malgun Gothic",
+        ).set_duration(9)
+        text_clips.append(clip)
 
 # 기존 결과물 삭제
 if os.path.exists("news_summary.mp4"):
     os.remove("news_summary.mp4")
 
-# 모든 클립을 연결해 최종 영상 생성 (fps 24, 유튜브 숏폼에 맞게 총 길이 조절)
+# 모든 클립을 연결해 최종 영상 생성 (fps 30, 유튜브 숏폼에 맞게 총 길이 조절)
 if text_clips:
     final_video = concatenate_videoclips(text_clips)
-    # 영상 길이가 30초를 초과하면 30초로 잘라줌
-    if final_video.duration > 27:
-        final_video = final_video.subclip(0, 27)
+    # 영상 길이가 60초를 초과하면 60초로 잘라줌
+    if final_video.duration > 60:
+        final_video = final_video.subclip(0, 60)
     # BGM 오디오 파일 로드 및 영상 길이에 맞게 자르기
     bgm_clip = AudioFileClip("News.mp3").subclip(0, final_video.duration)
     # 오디오 볼륨 조절이 필요하면 .volumex(0.5) 등을 사용할 수 있음
     final_video = final_video.set_audio(bgm_clip)
 
-    final_video.write_videofile("news_summary.mp4", fps=24)
+    final_video.write_videofile("news_summary.mp4", fps=30)
 else:
     print("표시할 뉴스 요약이 없습니다.")
